@@ -1,0 +1,350 @@
+#include<iostream>
+#include <windows.h>
+
+using namespace std;
+
+/*     Vježbe 1 - Principi OOP. klase, objekti.
+	Zadatak: Na osnovu opisa sistema prepoznati osnovne klase i atribute, kao i njihove relacije, 
+	te implementirati osnovne metode koje omogucavaju kreiranje i
+	ispis narudzbi klijentu. Obavezno implementirati Get i Set metode.
+	Tema: e-Restoran
+
+	Namjena aplikacije e-Restoran jeste da omoguci kreiranje narudzbi klijentima restorana putem standardnih PC i mobilnih uredjaja.
+	U procesu kreiranja narudzbe neophodno je da klijent obavi registraciju gdje upisuje svoje osnovne podatke: 
+	ime, prezime, kontakt broj i adresu.
+	Nakon uspjesne registracije klijenti mogu da kreiraju narudzbu na osnovu online ponude odabranog restorana.
+	Ponuda restorana se sastoji od jela i pica.
+	Uz svako jelo i pice se prikazuje kratak opis i cijena.
+	Narudzba koju klijent kreira sadrzi najmanje jedno jelo ili pice, ukupnu cijenu narudzbe i status isporuke.
+*/
+const char* crt = "\n----------------------------\n";
+
+const char* SpisakJela[5] = { "Pileci fileti", "Cevapi (5kom)", "Cevapi(10kom)", "Sudzukice    ", "Cheeseburger    " };
+const char* SpisakPica[7] = { "Senzacija", "Coca-Cola", "Burn      ", "Red Bull", "Kafa      ", "Caj       ", "Kisela voda" };
+
+float CijeneJela[5] = { 5, 3.5, 7, 4.5, 3.5 };
+float CijenePica[7] = { 2,3,4.5, 5.5, 1.5, 2, 1.5 };
+
+char* AlocirajNizKaraktera(const char* temp) {
+	if (temp == nullptr) return nullptr;
+	int vel = strlen(temp) + 1;
+	char* novi = new char[vel];
+	strcpy_s(novi, vel, temp);
+	return novi;
+}
+class Klijent
+{
+private:
+	char* _ime;
+	char* _prezime;
+	char* _adresa;
+	char _telefon[12];
+public:
+	Klijent() {
+		_ime = AlocirajNizKaraktera("Ime");
+		_prezime = AlocirajNizKaraktera("Prezime");
+		_adresa = AlocirajNizKaraktera("Adresa");
+		strcpy_s(_telefon, 12, "061-000-000");
+	}
+	~Klijent() {
+		delete[]_ime; _ime = nullptr;
+		delete[]_prezime; _prezime = nullptr;
+		delete[]_adresa; _adresa = nullptr;
+	}
+	void SetPodatke() {
+		char tempIme[20];
+		cout << "Unesite Ime " << endl;
+		cin.getline(tempIme, 20);
+		_ime = AlocirajNizKaraktera(tempIme);
+
+		char tempPrezime[20];
+		cout << "Unesite Prezime" << endl;
+		cin.getline(tempPrezime, 20);
+		_prezime = AlocirajNizKaraktera(tempPrezime);
+
+		char tempAdresa[20];
+		cout << "Unesite Adresu" << endl;
+		cin.getline(tempAdresa, 20);
+		_adresa = AlocirajNizKaraktera(tempAdresa);
+
+		cout << "Unesite telefon" << endl;
+		cin.getline(_telefon, 12);
+	}
+	void GetPodatke() {
+		cout << "Klijent" << endl;
+		cout << "Ime : " << _ime << endl;
+		cout << "Prezime : " << _prezime << endl;
+		cout << "Adresa : " << _adresa << endl;
+		cout << "Telefon : " << _telefon << endl;
+	}
+	friend ostream& operator<<(ostream&, Klijent&);
+};
+
+class Jelo
+{
+private:
+	char* _nazivJela;
+	float _cijena;
+	//char _opisJela[50];
+public:
+	Jelo() {
+		_nazivJela = AlocirajNizKaraktera("Naziv Jela");
+		_cijena = 0.00;
+	//	strcpy_s(_opisJela, 50, "Kratki opis jela");
+	}
+	Jelo(Jelo& orginal) {
+		_nazivJela = new char[strlen(orginal._nazivJela) + 1];
+		strcpy_s(_nazivJela, strlen(orginal._nazivJela) + 1, orginal._nazivJela);
+		_cijena = orginal._cijena;
+		//strcpy_s(_opisJela, strlen(orginal._opisJela) + 1, _opisJela);
+	}
+	~Jelo() {
+		delete[]_nazivJela; _nazivJela = nullptr;	
+	}
+	void DodajJelo(const char* naziv, float cijena) {
+		delete[]_nazivJela;
+		_nazivJela = AlocirajNizKaraktera(naziv);
+		_cijena = cijena;
+	}
+	void Info() {
+		cout << "Naziv jela : " << _nazivJela << endl;
+		cout << "Cijena jela : " << _cijena << endl;
+	//	cout << "Opis jela : " << _opisJela << endl;
+	}
+	Jelo operator=(const Jelo& drugo) {
+		delete[]this->_nazivJela;
+		this->_nazivJela = new char[strlen(drugo._nazivJela) + 1];
+		strcpy_s(this->_nazivJela, strlen(drugo._nazivJela) + 1, drugo._nazivJela);
+		this->_cijena = drugo._cijena;
+	//	strcpy_s(this->_opisJela, strlen(drugo._opisJela), drugo._opisJela);
+		return* this;
+	}
+	float GetCijena()const { return _cijena; }
+};
+
+
+class Pice
+{
+private:
+	char* _nazivPica;
+	float _cijena;
+//	char _opisPica[50];
+public:
+	Pice() {
+		_nazivPica = AlocirajNizKaraktera("Naziv pica");
+		_cijena = 0.00;
+	//	strcpy_s(_opisPica, 50, "Kratki opis pica");
+	}
+	Pice(Pice& orginal) {
+		_nazivPica = new char[strlen(orginal._nazivPica) + 1];
+		strcpy_s(_nazivPica, strlen(orginal._nazivPica) + 1, orginal._nazivPica);
+		_cijena = orginal._cijena;
+	//	strcpy_s(_opisPica, strlen(orginal._opisPica) + 1, _opisPica);
+	}
+	~Pice() {
+		delete[]_nazivPica; _nazivPica = nullptr;
+	}
+	void DodajPice (const char* naziv, float cijena) {
+		delete[]_nazivPica;
+		_nazivPica = AlocirajNizKaraktera(naziv);
+		_cijena = cijena;
+	}
+	void Info() {
+		cout << "Naziv pica : " << _nazivPica << endl;
+		cout << "Cijena pica : " << _cijena << endl;
+	//	cout << "Opis pica : " << _opisPica << endl;
+	}
+	Pice operator=(const Pice& drugo) {
+		delete[]this->_nazivPica;
+		this->_nazivPica = new char[strlen(drugo._nazivPica) + 1];
+		strcpy_s(this->_nazivPica, strlen(drugo._nazivPica) + 1, drugo._nazivPica);
+
+		this->_cijena = drugo._cijena;
+	//	strcpy_s(this->_opisPica, strlen(drugo._opisPica)+1, drugo._opisPica);
+		return*this;
+	}
+	float GetCijena()const { return _cijena; }
+
+};
+
+class Restoran
+{
+private:
+	char* _nazivRestorana;
+	Jelo _jela[5];
+	Pice _pica[7];
+
+public:
+	Restoran() {
+		_nazivRestorana = AlocirajNizKaraktera("Restoran");
+	}
+	Restoran(const char* naziv) {
+		_nazivRestorana = AlocirajNizKaraktera(naziv);
+		for (int i = 0; i < 5; i++) {
+			_jela[i].DodajJelo(SpisakJela[i], CijeneJela[i]);
+		}
+		for (int i = 0; i < 7; i++) {
+			_pica[i].DodajPice(SpisakPica[i], CijenePica[i]);
+		}
+	}
+	~Restoran() {
+		delete[]_nazivRestorana; _nazivRestorana = nullptr;
+	}
+	int PrikaziMeni(int& jeloPice) {
+		int odabir;
+		do {
+			system("CLS");
+			cout << "Odaberite narudzbu: \n\t1 -> Jelo\n\t2 -> Pice\n\t3 -> Pregled narudzbe\n\t4 -> Izlaz\n\nVas odabir: ";
+			cin >> odabir;
+		} while (odabir < 1 || odabir>4);
+		if (odabir == 1) {
+			system("CLS");
+			cout << "\t Jela" << crt;
+			for (int i = 0; i < 5; i++) {
+				cout << i + 1 << ". ";
+				_jela[i].Info();
+			}
+			do {
+				cout << "Unesite sta zelite pojesti ..." << endl;
+				cin >> jeloPice;
+			} while (jeloPice < 1 || jeloPice>5);
+
+		}
+		else if (odabir == 2) {
+			system("CLS");
+			cout << "\t Pica" << crt;
+			for (int i = 0; i < 7; i++) {
+				cout << i + 1 << ". ";
+				_pica[i].Info();
+			}
+			do {
+				cout << "Unesite sta zelite popiti ... " << endl;
+				cin >> jeloPice;
+			} while (jeloPice < 1 || jeloPice>5);
+		}
+		else jeloPice = -1;
+		--jeloPice;
+
+		return odabir;
+	}
+
+	char* GetNazivRestorana() { return _nazivRestorana; }
+	Jelo* GetJelo(){ return _jela; }
+	Pice* GetPice() { return _pica; }
+
+};
+
+class Narudzba
+{
+private:
+	Klijent _klijent;
+	Jelo* _jela;
+	Pice* _pica;
+	int _brojJela;
+	int _brojPica;
+public:
+	Narudzba() {
+		_klijent.SetPodatke();
+		_jela = nullptr;
+		_pica = nullptr;
+		_brojJela = 0;
+		_brojPica = 0;
+	}
+	~Narudzba() {
+		delete[]_jela; _jela = nullptr;
+		delete[]_pica; _pica = nullptr;
+	}
+	void GetPodatkeoKlijentu() { cout << _klijent; }
+	void DodajJelo(Jelo jelo) {
+		Jelo* temp = new Jelo[_brojJela + 1];
+		for (int i = 0; i < _brojJela; i++) {
+			temp[i] = _jela[i];
+		}
+		delete[]_jela;
+		temp[_brojJela] = jelo;
+		_jela = temp;
+		_brojJela++;
+	}
+	void DodajPica(Pice pice) {
+		Pice* temp = new Pice[_brojPica + 1];
+		for (int i = 0; i < _brojPica; i++) {
+			temp[i] = _pica[i];
+		}
+		delete[]_pica;
+		temp[_brojPica] = pice;
+		_pica = temp;
+		_brojPica++;
+	}
+	float GetTroskove() {
+		float ukupno = 0;
+		for (int i = 0; i < _brojJela; i++) {
+			ukupno += _jela->GetCijena();
+		}
+		for (int i = 0; i < _brojPica; i++) {
+			ukupno += _pica->GetCijena();
+		}
+		return ukupno;
+	}
+	void GetPodatkeONarudzbi() {
+		cout << crt << " Jela " << crt;
+		for (int i = 0; i < _brojJela; i++) {
+			cout << i + 1 << ". "; _jela->Info();
+		}
+		cout << crt << " Pica " << crt;
+		for (int i = 0; i < _brojPica; i++) {
+			cout << i + 1 << ". "; _pica->Info();
+		}
+		cout << "\nUkupno " << GetTroskove() << " KM" << endl;
+	}
+};
+ostream& operator<<(ostream& COUT, Klijent& k) {
+	COUT << "Klijent" << endl;
+	COUT << "Ime : " << k._ime << endl;
+	COUT << "Prezime : " << k._prezime << endl;
+	COUT << "Adresa : " << k._adresa << endl;
+	COUT << "Telefon : " << k._telefon << endl;
+	return COUT;
+}
+#include <windows.h>
+
+void Timer(int sec) {
+	cout << endl;
+	for (size_t i = sec; i > 0; i--)
+	{
+		cout << i;
+		Sleep(1000);
+		cout << "\b";
+	}
+}
+
+int main()
+{
+	Narudzba _narudzba;
+	Restoran restoran("Bosanska Avlija");
+	int indeks = 1;
+	int odabir = restoran.PrikaziMeni(indeks);
+	while (odabir != 4) {
+		if (odabir == 1) {
+			_narudzba.DodajJelo(restoran.GetJelo()[indeks]);
+			cout << "Jelo uspjesno dodano!\nJelo koje ste odabrali je:\n";
+			restoran.GetJelo()[indeks].Info();
+			Sleep(1500);
+		}
+		if (odabir == 2) {
+			_narudzba.DodajPica(restoran.GetPice()[indeks]);
+			cout << "Pice uspjesno dodano!\nPice koje ste odabrali je:\n";
+			restoran.GetPice()[indeks].Info();
+			Sleep(1500);
+		}
+		if (odabir == 3) {
+			system("CLS");
+			_narudzba.GetPodatkeoKlijentu();
+			_narudzba.GetPodatkeONarudzbi();
+			Timer(5);
+		}
+		odabir = restoran.PrikaziMeni(indeks);
+		if (odabir == -1) break;
+	}
+	cout << "\n\t Hvala vam sto ste koristili usluge restorana " << restoran.GetNazivRestorana() << endl;
+	return 0;
+}
